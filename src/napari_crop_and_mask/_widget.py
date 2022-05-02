@@ -9,15 +9,7 @@ from napari.layers.shapes.shapes import Shapes
 from napari.utils.events.event import Event
 from napari.viewer import Viewer
 from qtpy.QtCore import Qt
-from qtpy.QtWidgets import (
-    QCheckBox,
-    QComboBox,
-    QFormLayout,
-    QLabel,
-    QPushButton,
-    QVBoxLayout,
-    QWidget,
-)
+from qtpy.QtWidgets import QCheckBox, QComboBox, QFormLayout, QLabel, QPushButton, QVBoxLayout, QWidget
 from superqt import QEnumComboBox
 
 from napari_crop_and_mask.models import CropMode, InclusionMode
@@ -47,8 +39,7 @@ class ExampleQWidget(QWidget):
 
         # Label for the tool
         label = QLabel(
-            "Select the layer you want to crop, "
-            + "the shape layer used in cropping and get going.",
+            "Select the layer you want to crop, " + "the shape layer used in cropping and get going.",
             self,
         )
         label.setWordWrap(True)
@@ -61,9 +52,7 @@ class ExampleQWidget(QWidget):
 
         # Add image layer selection
         self.image_combobox = QComboBox(parent=self)
-        self.image_combobox.currentIndexChanged.connect(
-            self.image_selection_changed
-        )
+        self.image_combobox.currentIndexChanged.connect(self.image_selection_changed)
         options_form_layout.addRow("Image to crop", self.image_combobox)
 
         # Add shape layer selection
@@ -71,36 +60,24 @@ class ExampleQWidget(QWidget):
         options_form_layout.addRow("Shape to crop", self.shape_combobox)
 
         # Crop Mode selection
-        self.crop_mode_combobox = QEnumComboBox(
-            enum_class=CropMode, parent=self
-        )
-        self.crop_mode_combobox.currentIndexChanged.connect(
-            self.crop_mode_changed
-        )
+        self.crop_mode_combobox = QEnumComboBox(enum_class=CropMode, parent=self)
+        self.crop_mode_combobox.currentIndexChanged.connect(self.crop_mode_changed)
         options_form_layout.addRow("Crop-mask mode", self.crop_mode_combobox)
 
         # # Add include exclude mode selection
-        self.inclusion_mode_combobox = QEnumComboBox(
-            enum_class=InclusionMode, parent=self
-        )
-        options_form_layout.addRow(
-            "Inclusion mode", self.inclusion_mode_combobox
-        )
+        self.inclusion_mode_combobox = QEnumComboBox(enum_class=InclusionMode, parent=self)
+        options_form_layout.addRow("Inclusion mode", self.inclusion_mode_combobox)
 
         # Treat as RGB
         self.is_rgb_checkbox = QCheckBox("Is RGB image", parent=self)
         layout.addWidget(self.is_rgb_checkbox)
 
         # Apply cropping on the same layer
-        self.inplace_crop_checkbox = QCheckBox(
-            text="Inplace crop", parent=self
-        )
+        self.inplace_crop_checkbox = QCheckBox(text="Inplace crop", parent=self)
         layout.addWidget(self.inplace_crop_checkbox)
 
         # Delete shape layer after cropping
-        self.delete_shape_layer_checkbox = QCheckBox(
-            text="Delete shape layer upon completion", parent=self
-        )
+        self.delete_shape_layer_checkbox = QCheckBox(text="Delete shape layer upon completion", parent=self)
         self.delete_shape_layer_checkbox.setChecked(True)
         layout.addWidget(self.delete_shape_layer_checkbox)
 
@@ -126,9 +103,7 @@ class ExampleQWidget(QWidget):
 
     def crop_mode_changed(self):
         """Enables the inclusions masking option based on crop mode"""
-        is_crop = (
-            self.crop_mode_combobox.currentData() == CropMode.RECTANGULAR_CROP
-        )
+        is_crop = self.crop_mode_combobox.currentData() == CropMode.RECTANGULAR_CROP
         self.inclusion_mode_combobox.setEnabled(not is_crop)
 
     def initialize_lists(self):
@@ -144,12 +119,8 @@ class ExampleQWidget(QWidget):
         """Updates the layer lists"""
         value = event.value
         if isinstance(event.value, Image):
-            update_layer_combobox(
-                self.image_combobox, event.type, value, value.name
-            )
+            update_layer_combobox(self.image_combobox, event.type, value, value.name)
         elif isinstance(event.value, Shapes):
-            update_layer_combobox(
-                self.shape_combobox, event.type, value, value.name
-            )
+            update_layer_combobox(self.shape_combobox, event.type, value, value.name)
         else:
             pass
