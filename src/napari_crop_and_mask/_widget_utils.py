@@ -26,11 +26,9 @@ def update_layer_combobox(combobox: QComboBox, event_type: str, layer: Layer, te
     """Update combobox"""
     if event_type == "inserted":
         combobox.addItem(text, layer)
-        # name_func = lambda event, combobox=combobox: refresh_combobox_layer_name(event, combobox)
         layer.events.name.connect(lambda event, combobox=combobox: refresh_combobox_layer_name(event, combobox))
     elif event_type == "removed":
         item_index = get_combobox_item_index(combobox, layer)
-        # name_func = lambda event, combobox=combobox: refresh_combobox_layer_name(event, combobox)
         layer.events.name.disconnect(lambda event, combobox=combobox: refresh_combobox_layer_name(event, combobox))
         combobox.removeItem(item_index)
     else:
