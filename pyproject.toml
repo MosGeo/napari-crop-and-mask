@@ -7,8 +7,8 @@ build-backend = "setuptools.build_meta"
 write_to = "src/napari_crop_and_mask/_version.py"
 
 [tool.black]
-line-length = 79
+line-length = 120
 
 [tool.isort]
 profile = "black"
-line_length = 79
+line_length = 120
