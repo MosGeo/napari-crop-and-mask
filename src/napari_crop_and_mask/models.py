@@ -46,7 +46,8 @@ class InclusionMode(Enum):
     INCLUDE_SELECTED = "Keep selected shapes"
     EXCLUDE_SELECTED = "Exclude selected shapes"
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """Returns the string representation"""
         return self.value
 
     def is_invert_selection(self) -> bool:

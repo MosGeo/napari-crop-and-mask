@@ -177,8 +177,6 @@ class ExampleQWidget(QWidget):
         # Attempt to figure out the dimensions of indices
         dimension_indicies = core.infer_demension_indicies(len(image_data.shape), 2, is_rgb)
 
-        print(image_data.shape, dimension_indicies)
-
         # Begin crop and mask
         if is_rectangular:
             shape_points = np.vstack(shape_data)
@@ -189,6 +187,16 @@ class ExampleQWidget(QWidget):
                 dimension_min=dimension_min,
                 is_mask_only=is_mask_only,
                 mask_value=mask_value,
+                is_invert_selection=is_invert_selection,
+            )
+        else:
+            image_size = core.image_size(image_data, is_rgb=is_rgb)
+            masks = shape_layer.to_masks(mask_shape=image_size)
+            cropped_image = core.mask_irregular(
+                image=image_data,
+                masks=masks,
+                mask_value=mask_value,
+                dimension_indicies=dimension_indicies,
                 is_invert_selection=is_invert_selection,
             )
 

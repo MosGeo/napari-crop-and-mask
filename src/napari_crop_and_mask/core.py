@@ -6,7 +6,6 @@ import dask.array as da
 import numpy as np
 
 
-# =================================================================================================
 def combine_masks(masks: tuple) -> da.Array:
     """Combines multiple masks"""
 
@@ -18,7 +17,6 @@ def combine_masks(masks: tuple) -> da.Array:
     return combined_mask
 
 
-# =================================================================================================
 def mask_image(
     image: da.Array,
     mask: da.Array,
@@ -39,7 +37,6 @@ def mask_image(
     return masked_image
 
 
-# =================================================================================================
 def mask_irregular(
     image: da.Array,
     masks: Tuple,
@@ -59,7 +56,7 @@ def mask_irregular(
     all_dimensions = np.arange(image.ndim)
     new_dimensions_selected = [dim not in dimension_indicies for dim in all_dimensions]
     new_dimensions = tuple(all_dimensions[new_dimensions_selected])
-    mask = np.expand_dims(mask, axis=new_dimensions)
+    mask = da.expand_dims(mask, axis=new_dimensions)
     mask = da.broadcast_to(mask, shape=image.shape)
 
     # Mask the image based on selection
@@ -67,7 +64,6 @@ def mask_irregular(
     return masked_image
 
 
-# =================================================================================================
 def crop_hyperrectangle(
     image: da.Array,
     dimension_min: Sequence[int],
@@ -91,7 +87,6 @@ def crop_hyperrectangle(
     return cropped_image
 
 
-# =================================================================================================
 def mask_hyperrectangle(
     image: da.Array,
     dimension_min: Sequence[int],
@@ -126,7 +121,6 @@ def mask_hyperrectangle(
     return masked_image
 
 
-# =================================================================================================
 def infer_demension_indicies(n_dimensions_image: int, n_dimensions_indicies: int = 2, is_rgb: bool = False):
     """
     Try to infer the dimensions to crop based on the image shape and the number of dimensions to
@@ -146,7 +140,6 @@ def infer_demension_indicies(n_dimensions_image: int, n_dimensions_indicies: int
     return dimension_indicies
 
 
-# =================================================================================================
 def meshgrid_from_size(size) -> Tuple[da.Array]:
     """Create meshed grids for the given image size"""
 
@@ -156,7 +149,6 @@ def meshgrid_from_size(size) -> Tuple[da.Array]:
     return meshed_grids
 
 
-# =================================================================================================
 def get_bounding_box(points: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     """Returns the dimension minimum and maximum for a set of given points"""
     dimension_min: np.ndarray = np.min(points, axis=0).astype(int)
@@ -165,7 +157,6 @@ def get_bounding_box(points: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     return (dimension_min, dimension_max)
 
 
-# =================================================================================================
 def check_rgb(image: da.Array) -> bool:
     """Returns a boolean if the image is rgb"""
 
@@ -177,7 +168,6 @@ def check_rgb(image: da.Array) -> bool:
     return bool(image.ndim == 6 and image.shape[5] == 3)
 
 
-# =================================================================================================
 def image_size(image: da.Array, is_rgb: bool = False):
     """Returns the image size (x, y)"""
     if is_rgb is True:
@@ -186,7 +176,6 @@ def image_size(image: da.Array, is_rgb: bool = False):
     return (image.shape[-2], image.shape[-1])
 
 
-# =================================================================================================
 def crop_mask_hyperrectangle(
     image: da.Array,
     dimension_min: Sequence[int],
