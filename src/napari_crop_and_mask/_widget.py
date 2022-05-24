@@ -1,11 +1,12 @@
 """
-This module is an example of a barebones QWidget plugin for napari
+This module is the main widget for the plugin
 
 It implements the Widget specification.
 see: https://napari.org/plugins/guides.html?#widgets
 """
 import warnings
 
+import dask.array as da
 import numpy as np
 from napari.layers.image.image import Image
 from napari.layers.shapes.shapes import Shapes
@@ -20,7 +21,7 @@ from napari_crop_and_mask._widget_utils import update_layer_combobox
 from napari_crop_and_mask.models import CropMode, InclusionMode
 
 
-class ExampleQWidget(QWidget):
+class CropAndMaskWidget(QWidget):
     """Crop-Mask Widget"""
 
     def __init__(self, napari_viewer: Viewer):
@@ -77,6 +78,10 @@ class ExampleQWidget(QWidget):
         layout.addWidget(self.is_rgb_checkbox)
 
         # Apply cropping on the same layer
+        self.overwrite_orginal_checkbox = QCheckBox(text="Overwrite original image", parent=self)
+        layout.addWidget(self.overwrite_orginal_checkbox)
+
+        # Apply cropping on the same layer
         self.inplace_crop_checkbox = QCheckBox(text="Inplace crop", parent=self)
         layout.addWidget(self.inplace_crop_checkbox)
 
@@ -107,17 +112,20 @@ class ExampleQWidget(QWidget):
 
     def crop_mode_changed(self):
         """Enables the inclusions masking option based on crop mode"""
-        is_crop = self.crop_mode_combobox.currentData() == CropMode.RECTANGULAR_CROP
+        is_crop = self.crop_mode_combobox.currentEnum() == CropMode.RECTANGULAR_CROP
         self.inclusion_mode_combobox.setEnabled(not is_crop)
+        self.inplace_crop_checkbox.setEnabled(is_crop)
 
     def initialize_lists(self):
         """Updates the UI of the widget based on viewer data"""
         layers = self.viewer.layers
         for layer in layers:
             if isinstance(layer, Image):
-                self.image_combobox.addItem(layer.name, userData=layer)
+                update_layer_combobox(self.image_combobox, "inserted", layer, layer.name)
             elif isinstance(layer, Shapes):
-                self.shape_combobox.addItem(layer.name, userData=layer)
+                update_layer_combobox(self.shape_combobox, "inserted", layer, layer.name)
+            else:
+                pass
 
     def update_lists(self, event: Event):
         """Updates the layer lists"""
@@ -136,10 +144,11 @@ class ExampleQWidget(QWidget):
         image_layer: Image = self.image_combobox.currentData()
         shape_layer: Shapes = self.shape_combobox.currentData()
         is_rgb = self.is_rgb_checkbox.isChecked()
-        is_inplace_crop = self.inplace_crop_checkbox.isChecked()
+        is_overwrite_orginal = self.overwrite_orginal_checkbox.isChecked()
         is_delete_shape_layer = self.delete_shape_layer_checkbox.isChecked()
         crop_mode: CropMode = self.crop_mode_combobox.currentEnum()
         inclusion_mode: InclusionMode = self.inclusion_mode_combobox.currentEnum()
+        is_inplace_crop = self.inplace_crop_checkbox.isChecked()
 
         is_invert_selection = inclusion_mode.is_invert_selection()
         is_mask_only = crop_mode.is_mask_only()
@@ -153,6 +162,8 @@ class ExampleQWidget(QWidget):
 
         # Retrive data used
         image_data = image_layer.data
+        if not isinstance(image_data, da.Array):
+            image_data = da.from_array(image_data)
         is_rgb = image_layer.rgb
         ndim = image_data.ndim
         if is_rgb:
@@ -185,6 +196,7 @@ class ExampleQWidget(QWidget):
                 image=image_data,
                 dimension_max=dimension_max,
                 dimension_min=dimension_min,
+                dimension_indicies=dimension_indicies,
                 is_mask_only=is_mask_only,
                 mask_value=mask_value,
                 is_invert_selection=is_invert_selection,
@@ -201,14 +213,19 @@ class ExampleQWidget(QWidget):
             )
 
         # Add/update layer
-        if is_inplace_crop is False:
-            self.add_similar_image_layer(
+        if is_overwrite_orginal is False:
+            cropped_image_layer = self.add_similar_image_layer(
                 data=cropped_image,
                 name=image_layer.name + "(cropped)",
                 reference_layer=image_layer,
             )
         else:
-            image_layer.data = cropped_image
+            cropped_image_layer = image_layer
+            cropped_image_layer.data = cropped_image
+
+        # Transform layer if required
+        if crop_mode == CropMode.RECTANGULAR_CROP and is_inplace_crop:
+            print(type(cropped_image_layer))
 
         # Delete shape layer if required
         if is_delete_shape_layer is True:

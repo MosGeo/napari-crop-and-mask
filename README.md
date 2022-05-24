@@ -7,26 +7,17 @@
 [![codecov](https://codecov.io/gh/MosGeo/napari-crop-and-mask/branch/main/graph/badge.svg)](https://codecov.io/gh/MosGeo/napari-crop-and-mask)
 [![napari hub](https://img.shields.io/endpoint?url=https://api.napari-hub.org/shields/napari-crop-and-mask)](https://napari-hub.org/plugins/napari-crop-and-mask)
 
-A powerful napari plugin for cropping and masking
+A napari plugin for cropping and masking. Everything is implemented in dask to allow scalbility. Core functionlity is seperated from the napari/UI to allow usablity. This is currently in prototyping phase and so it is not officially in PyPI yet. The following features are implemented.
 
-----------------------------------
+1. Rectangular cropping in 2D and 3D images (RGB and non RGB), technically, it would work on an arbitery number of dimensions but I have not tested it heavily.
+2. Masking images using any shape (irregular and regular/rectangular). Masking can be done using zero and nan values. Note that napari has issues displaying RGB images with nan values as nan values are floats.
 
-This [napari] plugin was generated with [Cookiecutter] using [@napari]'s [cookiecutter-napari-plugin] template.
 
-<!--
-Don't miss the full getting started guide to set up your new package:
-https://github.com/napari/cookiecutter-napari-plugin#getting-started
+## Installation (not yet)
 
-and review the napari docs for plugin developers:
-https://napari.org/plugins/index.html
--->
+<!-- You can install `napari-crop-and-mask` via [pip]:
 
-## Installation
-
-You can install `napari-crop-and-mask` via [pip]:
-
-    pip install napari-crop-and-mask
-
+    pip install napari-crop-and-mask -->
 
 
 To install latest development version :
@@ -38,6 +29,18 @@ To install latest development version :
 
 Contributions are very welcome. Tests can be run with [tox], please ensure
 the coverage at least stays the same before you submit a pull request.
+
+Things that I need to do/check on:
+1. Best way to handle "errors" in napari. Now they are implemented as warnings.
+2. Testing on n-dimensional images.
+3. RGB nan masking.
+4. Tests (at least for core.py file)
+5. Better comments in code.
+6. Maybe ability to switch between backends (dask and numpy)?
+7. np2 commands vs widgets.
+8. Location of command in napari menu (don't like the plugin location)
+9. Fix napari disabled style (https://github.com/napari/napari/issues/3601)
+
 
 ## License
 

@@ -77,8 +77,8 @@ def crop_hyperrectangle(
 
     # Cropping
     cropped_image = image
-    for i, dimension in enumerate(dimension_indicies):
-        indicies = np.arange(dimension_min[i], dimension_max[i])
+    for dimension in dimension_indicies:
+        indicies = np.arange(dimension_min[dimension], dimension_max[dimension])
         indicies_selected = np.logical_and(indicies >= 0, indicies < image.shape[dimension])
         indicies = indicies[indicies_selected]
 
