@@ -3,8 +3,13 @@ display_name: Crop and Mask
 contributions:
   commands:
     - id: napari-crop-and-mask.make_qwidget
-      python_name: napari_crop_and_mask._widget:CropAndMaskWidget
-      title: Make Crop and Mask
+      python_name: napari_crop_and_mask._crop_widget:CropWidget
+      title: Crop
+    - id: napari-crop-and-mask.make_qwidget2
+      python_name: napari_crop_and_mask._mask_widget:MaskWidget
+      title: Mask
   widgets:
     - command: napari-crop-and-mask.make_qwidget
-      display_name: Crop and Mask
+      display_name: Crop
+    - command: napari-crop-and-mask.make_qwidget2
+      display_name: Mask

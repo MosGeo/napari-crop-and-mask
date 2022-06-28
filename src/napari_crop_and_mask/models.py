@@ -3,10 +3,9 @@ from enum import Enum
 from numpy import nan
 
 
-class CropMode(Enum):
-    """An enum to hold the crop modes"""
+class MaskMode(Enum):
+    """An enum to hold the mask modes"""
 
-    RECTANGULAR_CROP = "Rectangular crop"
     RECTANGULAR_MASK_NAN = "Rectangular mask with NaN"
     RECTANGULAR_MASK_ZERO = "Rectangular mask with zeros"
     IRREGULAR_MASK_NAN = "Irregular mask with NaN"
@@ -18,21 +17,18 @@ class CropMode(Enum):
     def is_rectangular(self) -> bool:
         """Returns boolean fro rectangular cropping"""
         is_rectangular = self in [
-            CropMode.RECTANGULAR_CROP,
-            CropMode.RECTANGULAR_MASK_NAN,
-            CropMode.RECTANGULAR_MASK_ZERO,
+            MaskMode.RECTANGULAR_MASK_NAN,
+            MaskMode.RECTANGULAR_MASK_ZERO,
         ]
         return is_rectangular
 
     def is_mask_only(self) -> bool:
-        if self != CropMode.RECTANGULAR_CROP:
-            return True
-        return False
+        return True
 
     @property
     def mask_value(self) -> float:
         """Returns the mask value"""
-        if self == CropMode.RECTANGULAR_MASK_NAN or self == CropMode.IRREGULAR_MASK_NAN:
+        if self == MaskMode.RECTANGULAR_MASK_NAN or self == MaskMode.IRREGULAR_MASK_NAN:
             mask_value = nan
         else:
             mask_value = 0

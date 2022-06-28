@@ -14,14 +14,13 @@ from napari.utils.events.event import Event
 from napari.viewer import Viewer
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QCheckBox, QComboBox, QFormLayout, QLabel, QPushButton, QVBoxLayout, QWidget
-from superqt import QEnumComboBox
+from superqt import QCollapsible
 
 from napari_crop_and_mask import core
 from napari_crop_and_mask._widget_utils import update_layer_combobox
-from napari_crop_and_mask.models import CropMode, InclusionMode
 
 
-class CropAndMaskWidget(QWidget):
+class CropWidget(QWidget):
     """Crop-Mask Widget"""
 
     def __init__(self, napari_viewer: Viewer):
@@ -38,7 +37,8 @@ class CropAndMaskWidget(QWidget):
         layout.setAlignment(Qt.AlignTop)
         self.setMinimumWidth(350)
         self.setMaximumWidth(500)
-        self.setFixedHeight(300)
+        # self.setMaximumHeight(310)
+        # self.setFixedHeight(300)
         self.viewer.layers.events.inserted.connect(self.update_lists)
         self.viewer.layers.events.removed.connect(self.update_lists)
 
@@ -64,40 +64,35 @@ class CropAndMaskWidget(QWidget):
         self.shape_combobox = QComboBox(parent=self)
         options_form_layout.addRow("Shape to crop", self.shape_combobox)
 
-        # Crop Mode selection
-        self.crop_mode_combobox = QEnumComboBox(enum_class=CropMode, parent=self)
-        self.crop_mode_combobox.currentIndexChanged.connect(self.crop_mode_changed)
-        options_form_layout.addRow("Crop-mask mode", self.crop_mode_combobox)
-
-        # # Add include exclude mode selection
-        self.inclusion_mode_combobox = QEnumComboBox(enum_class=InclusionMode, parent=self)
-        options_form_layout.addRow("Inclusion mode", self.inclusion_mode_combobox)
+        # Add advanced option
+        options_collapsible = QCollapsible()
+        options_collapsible.setText("Advanced options")
+        layout.addWidget(options_collapsible)
 
         # Treat as RGB
         self.is_rgb_checkbox = QCheckBox("Is RGB image", parent=self)
-        layout.addWidget(self.is_rgb_checkbox)
+        options_collapsible.addWidget(self.is_rgb_checkbox)
 
         # Apply cropping on the same layer
         self.overwrite_orginal_checkbox = QCheckBox(text="Overwrite original image", parent=self)
-        layout.addWidget(self.overwrite_orginal_checkbox)
+        options_collapsible.addWidget(self.overwrite_orginal_checkbox)
 
         # Apply cropping on the same layer
         self.inplace_crop_checkbox = QCheckBox(text="Inplace crop", parent=self)
-        layout.addWidget(self.inplace_crop_checkbox)
+        options_collapsible.addWidget(self.inplace_crop_checkbox)
 
         # Delete shape layer after cropping
         self.delete_shape_layer_checkbox = QCheckBox(text="Delete shape layer upon completion", parent=self)
         self.delete_shape_layer_checkbox.setChecked(True)
-        layout.addWidget(self.delete_shape_layer_checkbox)
+        options_collapsible.addWidget(self.delete_shape_layer_checkbox)
 
         # Add crop button
-        layout.addStretch()
+        # layout.addStretch()
         crop_button = QPushButton("Crop!")
         crop_button.clicked.connect(self.crop_button_clicked)
         layout.addWidget(crop_button)
 
         self.initialize_lists()
-        self.crop_mode_changed()
 
     def image_selection_changed(self):
         """Updates the settings based on selection"""
@@ -109,12 +104,6 @@ class CropAndMaskWidget(QWidget):
             self.is_rgb_checkbox.setChecked(is_rgb)
         else:
             self.is_rgb_checkbox.setChecked(False)
-
-    def crop_mode_changed(self):
-        """Enables the inclusions masking option based on crop mode"""
-        is_crop = self.crop_mode_combobox.currentEnum() == CropMode.RECTANGULAR_CROP
-        self.inclusion_mode_combobox.setEnabled(not is_crop)
-        self.inplace_crop_checkbox.setEnabled(is_crop)
 
     def initialize_lists(self):
         """Updates the UI of the widget based on viewer data"""
@@ -146,14 +135,7 @@ class CropAndMaskWidget(QWidget):
         is_rgb = self.is_rgb_checkbox.isChecked()
         is_overwrite_orginal = self.overwrite_orginal_checkbox.isChecked()
         is_delete_shape_layer = self.delete_shape_layer_checkbox.isChecked()
-        crop_mode: CropMode = self.crop_mode_combobox.currentEnum()
-        inclusion_mode: InclusionMode = self.inclusion_mode_combobox.currentEnum()
         is_inplace_crop = self.inplace_crop_checkbox.isChecked()
-
-        is_invert_selection = inclusion_mode.is_invert_selection()
-        is_mask_only = crop_mode.is_mask_only()
-        mask_value = crop_mode.mask_value
-        is_rectangular = crop_mode.is_rectangular()
 
         # Stopping condition 1
         if image_layer is None:
@@ -189,28 +171,17 @@ class CropAndMaskWidget(QWidget):
         dimension_indicies = core.infer_demension_indicies(len(image_data.shape), 2, is_rgb)
 
         # Begin crop and mask
-        if is_rectangular:
-            shape_points = np.vstack(shape_data)
-            dimension_min, dimension_max = core.get_bounding_box(shape_points)
-            cropped_image = core.crop_mask_hyperrectangle(
-                image=image_data,
-                dimension_max=dimension_max,
-                dimension_min=dimension_min,
-                dimension_indicies=dimension_indicies,
-                is_mask_only=is_mask_only,
-                mask_value=mask_value,
-                is_invert_selection=is_invert_selection,
-            )
-        else:
-            image_size = core.image_size(image_data, is_rgb=is_rgb)
-            masks = shape_layer.to_masks(mask_shape=image_size)
-            cropped_image = core.mask_irregular(
-                image=image_data,
-                masks=masks,
-                mask_value=mask_value,
-                dimension_indicies=dimension_indicies,
-                is_invert_selection=is_invert_selection,
-            )
+        shape_points = np.vstack(shape_data)
+        dimension_min, dimension_max = core.get_bounding_box(shape_points)
+        cropped_image = core.crop_mask_hyperrectangle(
+            image=image_data,
+            dimension_max=dimension_max,
+            dimension_min=dimension_min,
+            dimension_indicies=dimension_indicies,
+            is_mask_only=False,
+            mask_value=None,
+            is_invert_selection=False,
+        )
 
         # Add/update layer
         if is_overwrite_orginal is False:
@@ -224,7 +195,7 @@ class CropAndMaskWidget(QWidget):
             cropped_image_layer.data = cropped_image
 
         # Transform layer if required
-        if crop_mode == CropMode.RECTANGULAR_CROP and is_inplace_crop:
+        if is_inplace_crop:
             print(type(cropped_image_layer))
 
         # Delete shape layer if required
