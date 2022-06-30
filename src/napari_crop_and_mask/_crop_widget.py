@@ -78,7 +78,7 @@ class CropWidget(QWidget):
         options_collapsible.addWidget(self.overwrite_orginal_checkbox)
 
         # Apply cropping on the same layer
-        self.inplace_crop_checkbox = QCheckBox(text="Inplace crop", parent=self)
+        self.inplace_crop_checkbox = QCheckBox(text="Inplace crop (translate layer)", parent=self)
         options_collapsible.addWidget(self.inplace_crop_checkbox)
 
         # Delete shape layer after cropping
@@ -88,7 +88,7 @@ class CropWidget(QWidget):
 
         # Add crop button
         # layout.addStretch()
-        crop_button = QPushButton("Crop!")
+        crop_button = QPushButton("Crop")
         crop_button.clicked.connect(self.crop_button_clicked)
         layout.addWidget(crop_button)
 
@@ -196,7 +196,11 @@ class CropWidget(QWidget):
 
         # Transform layer if required
         if is_inplace_crop:
-            print(type(cropped_image_layer))
+            translation = np.zeros_like(dimension_min)
+            for ind in dimension_indicies:
+                translation[ind] = dimension_min[ind]
+            cropped_image_layer.translate = translation
+            # print(type(cropped_image_layer))
 
         # Delete shape layer if required
         if is_delete_shape_layer is True:

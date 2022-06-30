@@ -94,7 +94,7 @@ class MaskWidget(QWidget):
 
         # Add crop button
         # layout.addStretch()
-        crop_button = QPushButton("Crop!")
+        crop_button = QPushButton("Mask")
         crop_button.clicked.connect(self.crop_button_clicked)
         layout.addWidget(crop_button)
 
