@@ -44,7 +44,7 @@ class CropWidget(QWidget):
 
         # Label for the tool
         label = QLabel(
-            "Select the layer you want to crop, " + "the shape layer used in cropping and get going.",
+            "Select the layer you want to mask, " + "the shape layer used in masking and get going.",
             self,
         )
         label.setWordWrap(True)
