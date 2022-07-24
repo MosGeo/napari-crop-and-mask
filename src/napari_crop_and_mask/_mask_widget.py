@@ -66,18 +66,24 @@ class MaskWidget(QWidget):
         self.shape_combobox = QComboBox(parent=self)
         options_form_layout.addRow("Masking shape", self.shape_combobox)
 
-        # Crop Mode selection
-        self.mask_mode_combobox = QEnumComboBox(enum_class=MaskMode, parent=self)
-        options_form_layout.addRow("Mask mode", self.mask_mode_combobox)
-
-        # # Add include exclude mode selection
-        self.inclusion_mode_combobox = QEnumComboBox(enum_class=InclusionMode, parent=self)
-        options_form_layout.addRow("Inclusion mode", self.inclusion_mode_combobox)
-
         # Add advanced option
         options_collapsible = QCollapsible()
         options_collapsible.setText("Advanced options")
         layout.addWidget(options_collapsible)
+
+        advanced_options_form_widget = QWidget()
+        advanced_options_form_layout = QFormLayout()
+        advanced_options_form_layout.setContentsMargins(0, 0, 0, 0)
+        advanced_options_form_widget.setLayout(advanced_options_form_layout)
+        options_collapsible.addWidget(advanced_options_form_widget)
+
+        # Crop Mode selection
+        self.mask_mode_combobox = QEnumComboBox(enum_class=MaskMode, parent=self)
+        advanced_options_form_layout.addRow("Mask mode", self.mask_mode_combobox)
+
+        # # Add include exclude mode selection
+        self.inclusion_mode_combobox = QEnumComboBox(enum_class=InclusionMode, parent=self)
+        advanced_options_form_layout.addRow("Inclusion mode", self.inclusion_mode_combobox)
 
         # Treat as RGB
         self.is_rgb_checkbox = QCheckBox("Is RGB image", parent=self)
@@ -181,7 +187,7 @@ class MaskWidget(QWidget):
         # Attempt to figure out the dimensions of indices
         dimension_indicies = core.infer_demension_indicies(len(image_data.shape), 2, is_rgb)
 
-        # Begin crop and mask
+        # Begin mask
         if is_rectangular:
             shape_points = np.vstack(shape_data)
             dimension_min, dimension_max = core.get_bounding_box(shape_points)
